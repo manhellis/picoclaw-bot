@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  pico-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: picoclaw-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=pico
+      - DB_USER=pico
+      - DB_PASSWORD=${DB_PASSWORD:-picosecret123}
+      - NODE_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - picoclaw-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "postgres", "-U", "pico"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: picoclaw-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=pico
+      - POSTGRES_USER=pico
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-picosecret123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - picoclaw-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pico -d pico"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  picoclaw-network:
+    driver: bridge
