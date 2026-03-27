@@ -21,12 +21,8 @@ services:
         condition: service_healthy
     networks:
       - picoclaw-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "-h", "postgres", "-U", "pico"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # Healthcheck removed - Discord bot doesn't expose HTTP port
+    # Coolify will monitor container status instead
 
   postgres:
     image: postgres:16-alpine
