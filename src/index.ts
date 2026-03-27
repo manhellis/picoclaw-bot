@@ -85,8 +85,10 @@ class PicoBot {
 
     console.log(`💬 ${message.author.username}: ${message.content.substring(0, 50)}...`);
 
-    // Show typing indicator
-    await message.channel.sendTyping();
+    // Show typing indicator (only for text-based channels)
+    if ('sendTyping' in message.channel) {
+      await message.channel.sendTyping();
+    }
 
     try {
       // Get context window for this channel
